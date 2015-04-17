@@ -51,8 +51,8 @@ activity <- tbl_df(read.csv("activity.csv"))
 
     
 ####2.- What is mean total number of steps taken per day?
-The data frame is cleaned by filtering NA's out, then grouped by date and summarize the total steps into the steps object. 
-A histogram  is shown in wich we can see that the mean value in a day is around 11,000 steps.
+The data frame is cleaned by filtering NA's out, then grouped by date and summarize( sum) the total steps into the steps object. 
+A histogram with bins=1000 steps is shown in wich we can see that the mean value of steps in a day is around 11,000 steps.
 
 ```{r}
 steps <- activity %>%
@@ -60,33 +60,36 @@ steps <- activity %>%
      group_by(date) %>% ## grouping by date
      summarise( daySteps = sum(steps)) ## and summing the steps by groupped date.
 ## histogram 
-hist(steps$daySteps,col="red", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurences"))
+hist(steps$daySteps,col="red", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurrences"))
 ```
 
 ####  Mean and median  
- The calculated mean and median ( code below) is:  
- 
- Mean:      10766.19  
- Median:    10765
- 
- So we see that the distribution shows mean symetry ( mean = median). 
 
 ```{r}
-
+options(scipen=999)
+options(digits = 2)
 mean <- summarize(steps, mean(daySteps))
 median <- summarize(steps, median(daySteps))
-mean
+mean 
 median
 
 
 ```
+ The calculated mean and median ( code above) is:  
+ 
+    -   Mean:    `r mean`  
+    - Median:    `r median`
+ 
+ So we see that the distribution shows mean symetry ( mean = median). 
+
+
 ####_________________________________________________________________________
     
 ####    
 
     
 ####3.- What is the average daily activity pattern?
-defining trim_activity as the activity trimmed from NA's, groupped by the interval of the day and summarize the mean of each interval,
+Defining trim_activity as the activity trimmed from NA's, groupped by the interval of the day and summarize the mean of each interval,
 then plotting it.
 
 ```{r}
@@ -99,7 +102,7 @@ with(trim_activity, {
     plot( interval/100, intSteps,type="l",  xlab=" Time of the Day(24 hour)", ylab=" Step activity", ylim = range(intSteps), col ="magenta", xlim = range(0:24), xaxt="n") 
     axis(1, at=c(2,4,6,8,10,12,14,16,18,20,22,24)) 
     title(main = "Average step activity by time inteval")
-    
+     grid()
 })
 ```
 
@@ -130,12 +133,15 @@ dimTot <-dim(activity)
 act_nas <-activity %>%
      filter(is.na(steps))
 dimNas<-dim(act_nas)
+dimNas[1]
 
 ```
-... and, there are  `r dimNas[1]` NA's on a total of `r dimTot[1]` records  
+... and, there are  `r dimNas[1]` NA's on a total of `r dimTot[1]` records; or about 13%  
   
 Now creating a dataset with the NA's filled with the average value for that interval. We'll take the average from trim_activity that is groupped by interval and sumarized by it. 
-So trim_activity holds the average value for each 5 minute period of the day. 
+So trim_activity holds the average value for each 5 minute period of the day.
+  
+
 ```{r}
 corrected <-  activity %>%
             mutate(steps = ifelse(is.na(steps), trim_activity[trim_activity$interval == interval,]$intSteps, steps))%>% # ifelse() inserts on 'steps' the average value if the original value is NA
@@ -145,6 +151,10 @@ newSteps <- corrected %>% ## now 'corrected' holds valid values, so  we do the s
      summarise( daySteps = sum(steps)) ## and summing the steps by groupped date.
 ## histogram 
 hist(newSteps$daySteps,col="darkblue", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurences"))
+```
+  
+Then, for the mean and median, we take the percent difference between the old value and the new one.
+```{r}
 
 newmean <- summarize(newSteps, mean(daySteps))
 nwemedian <- summarize(newSteps, median(daySteps))
@@ -154,9 +164,11 @@ diff_mean <- 100*abs(mean-newmean)/mean
 diff_median
 diff_mean
 ```
-We can see that inserting the average value of the interval into NA values practically doesn't modify the chacracteristics of the disteibution, since
-the mean is unaffected, obvious, since we have introduced mean values, and the median is affected by only `r diff_median`%, a negligible difference. 
-The only concern is about stationality ( weekends vs non weekends)
+  
+We can see that inserting the average value of the interval into NA values it virtually doesn't modify the chacracteristics of the distribution, since
+the mean is unaffected (obvious, since we have introduced mean values) and the median is affected by only `r diff_median`%, a negligible difference.  
+  
+The only concern is about stationality ( weekends vs non weekends), but it shold be negligible too, since we deal wih a small change on a  0.01% difference.
 
 
 ####_________________________________________________________________________
@@ -165,6 +177,12 @@ The only concern is about stationality ( weekends vs non weekends)
 
     
 ####5.- Are there differences in activity patterns between weekdays and weekends?
+Below the code that try to answer the question.
+We add a new category 'day', with values 'weekday' or 'weekend', deppending on the day of the week.  
+  
+Then we group and summarise by interval as before.  
+The plotting code define a dual pannel that plots the subset group 'weekend' on the upper plot
+and the subset group 'weekdays' on the lower one.
 
 ```{r fig.height =7}
 weekactivity <- corrected %>%
@@ -188,15 +206,14 @@ with(subset(weekactivity, day=="weekend"), { ## subsetting weekend days
     title(main = "Average step activity by time inteval- Weekdays") 
     grid()
 
-
-
 ```
   
-We can see a different pattern during weekdays compared to weekends, as expected. Where on weekdays we see an increase in the peak activity from 8 to 9:30, on weekend days we see an increase of the activity roughly evenly distributed from 8 to 20, so it seems the subject has a sedentary job but seems to enjoy sporty weekend days.
-
-
-
-
+So the short answer is YES; there are different patterns.  
+  
+We can observe a different pattern on weekends from  weekdays, as might be expected. Where on weekdays we see an  peak activity from 8 to 9:30 and then a plateau, on weekend days we see with roughly evenly distributed peaks from 8 to 20, so it seems the subject has a sedentary job but seems to enjoy sporty weekend days.
+   
+   
+   
 
 
 
