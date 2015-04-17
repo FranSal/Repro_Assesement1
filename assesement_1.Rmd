@@ -29,7 +29,7 @@ library(lubridate)
 
 
 ```{r}
-WorkDir <- "/Volumes/LION-DATA/COURSERA /DATA SCIENTIST/REPRODUCIBLE RESEARCH"
+WorkDir <- "/Volumes/LION-DATA/COURSERA /DATA SCIENTIST/REPRODUCIBLE RESEARCH" # work dir has to be modified to fit your system. The rest pends from it, so it should work
 setwd(WorkDir)
 ## check for Peer_Assessement_1 folder and create ir if it doesn´t exist.
 if(!file.exists("Peer_Assessment_1"))  create.project("Peer_Assessment_1")
