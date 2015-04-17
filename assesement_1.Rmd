@@ -1,0 +1,204 @@
+---
+title: "Peer Assesement 1"
+#   
+
+---
+
+####This is the document that describes my work for Coursera's Reproductible Research, Assesement 1  
+Autor:FSC
+
+####___________________________________________________________________ 
+
+####  
+
+#### 1.- Project creation and data reading and processing
+
+
+The data file for the assignment has been downloaded to my download folder.
+The code segment below will use ProjectTemplate library to create a set if folders for this project, copy the file to the data folder and unzip it, then it reads the data into 'repdata' object
+```{r, results = 'hide', message=FALSE}
+
+library('ProjectTemplate')
+library(plyr)
+library(dplyr)
+library(tcltk)
+library(ggplot2)
+library(lubridate)
+
+```
+
+
+```{r}
+WorkDir <- "/Volumes/LION-DATA/COURSERA /DATA SCIENTIST/REPRODUCIBLE RESEARCH"
+setwd(WorkDir)
+## check for Peer_Assessement_1 folder and create ir if it doesn´t exist.
+if(!file.exists("Peer_Assessment_1"))  create.project("Peer_Assessment_1")
+setwd("Peer_Assessment_1")
+
+## Copying a file from a dir to another dir in case ir hasn't been copied before
+from <-"/users/Fran/Downloads/repdata-data-activity.zip"
+to <- "./data/repdata-data-activity.zip"
+if(!file.exists(to))  file.copy(from, to)
+                                
+setwd("./data")   ## changing to data folder and unzip if neccesary
+if(!file.exists("activity.csv")) unzip("repdata-data-activity.zip")
+activity <- tbl_df(read.csv("activity.csv"))
+```
+
+####_________________________________________________________________________
+    
+####    
+
+    
+####2.- What is mean total number of steps taken per day?
+The data frame is cleaned by filtering NA's out, then grouped by date and summarize the total steps into the steps object. 
+A histogram  is shown in wich we can see that the mean value in a day is around 11,000 steps.
+
+```{r}
+steps <- activity %>%
+     filter(steps != "NA") %>%  ## filtering out rows with NA's on steps
+     group_by(date) %>% ## grouping by date
+     summarise( daySteps = sum(steps)) ## and summing the steps by groupped date.
+## histogram 
+hist(steps$daySteps,col="red", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurences"))
+```
+
+####  Mean and median  
+ The calculated mean and median ( code below) is:  
+ 
+ Mean:      10766.19  
+ Median:    10765
+ 
+ So we see that the distribution shows mean symetry ( mean = median). 
+
+```{r}
+
+mean <- summarize(steps, mean(daySteps))
+median <- summarize(steps, median(daySteps))
+mean
+median
+
+
+```
+####_________________________________________________________________________
+    
+####    
+
+    
+####3.- What is the average daily activity pattern?
+defining trim_activity as the activity trimmed from NA's, groupped by the interval of the day and summarize the mean of each interval,
+then plotting it.
+
+```{r}
+trim_activity <- activity %>%
+     filter(steps != "NA")  %>% ## filtering out rows with NA's on steps
+     group_by(interval) %>%
+    summarise( intSteps = mean(steps))
+with(trim_activity, {
+    par(mar = c(4,4,4,2))
+    plot( interval/100, intSteps,type="l",  xlab=" Time of the Day(24 hour)", ylab=" Step activity", ylim = range(intSteps), col ="magenta", xlim = range(0:24), xaxt="n") 
+    axis(1, at=c(2,4,6,8,10,12,14,16,18,20,22,24)) 
+    title(main = "Average step activity by time inteval")
+    
+})
+```
+
+
+Then search for the max of the day...
+
+```{r}
+
+maxActivity <- summarise(trim_activity, maxSteps = max(intSteps), interval = substr(hm(interval[intSteps ==maxSteps]/100),1,6))
+maxActivity 
+           
+```
+which is an average of  `r maxActivity$maxSteps` steps at `r maxActivity$interval`   time interval.
+
+
+####_________________________________________________________________________
+    
+####    
+
+    
+####4.- Imputing missing values
+
+a.- Calculating the number of missing values...
+
+```{r}
+dimTot <-dim(activity)
+
+act_nas <-activity %>%
+     filter(is.na(steps))
+dimNas<-dim(act_nas)
+
+```
+... and, there are  `r dimNas[1]` NA's on a total of `r dimTot[1]` records  
+  
+Now creating a dataset with the NA's filled with the average value for that interval. We'll take the average from trim_activity that is groupped by interval and sumarized by it. 
+So trim_activity holds the average value for each 5 minute period of the day. 
+```{r}
+corrected <-  activity %>%
+            mutate(steps = ifelse(is.na(steps), trim_activity[trim_activity$interval == interval,]$intSteps, steps))%>% # ifelse() inserts on 'steps' the average value if the original value is NA
+            filter(steps != "NA") ## filtering out rows with NA's on steps ( that are redundant since we inseted the averages)
+newSteps <- corrected %>% ## now 'corrected' holds valid values, so  we do the same as in the 1st histogram case 
+     group_by(date) %>% ## grouping by date
+     summarise( daySteps = sum(steps)) ## and summing the steps by groupped date.
+## histogram 
+hist(newSteps$daySteps,col="darkblue", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurences"))
+
+newmean <- summarize(newSteps, mean(daySteps))
+nwemedian <- summarize(newSteps, median(daySteps))
+
+diff_median <- 100*abs(median-nwemedian)/median
+diff_mean <- 100*abs(mean-newmean)/mean
+diff_median
+diff_mean
+```
+We can see that inserting the average value of the interval into NA values practically doesn't modify the chacracteristics of the disteibution, since
+the mean is unaffected, obvious, since we have introduced mean values, and the median is affected by only `r diff_median`%, a negligible difference. 
+The only concern is about stationality ( weekends vs non weekends)
+
+
+####_________________________________________________________________________
+    
+####    
+
+    
+####5.- Are there differences in activity patterns between weekdays and weekends?
+
+```{r fig.height =7}
+weekactivity <- corrected %>%
+                mutate( day = ifelse(wday(ymd(date))==7 | wday(ymd(date))==1, "weekend", "weekday" )) %>% ## adding a day category, then grouping and summarizing
+                group_by(day,  interval) %>%
+                summarise( intSteps = mean(steps))
+             
+par(mfrow = c(2, 1)) ## define a dual pannel, 2 rows, by 1.
+par(mar = c(4,5,2,1))  ## defining margins.
+## graphs code.
+with(subset(weekactivity, day=="weekend"), { ## subsetting weekend days
+    plot( interval/100, intSteps,type="l",  xlab=" Time of the Day(24 hour)", ylab=" Steps", ylim = range(0:230), col ="darkmagenta", xlim = range(0:24), xaxt="n") 
+     })
+    axis(1, at=c(2,4,6,8,10,12,14,16,18,20,22,24)) 
+    title(main = "Average step activity by time inteval- Weekends") 
+    grid()
+   with(subset(weekactivity, day=="weekday"), { ## subsetting weekdays
+    plot( interval/100, intSteps,type="l",  xlab=" Time of the Day(24 hour)", ylab=" Steps", ylim = range(0:230), col ="blue", xlim = range(0:24), xaxt="n") 
+     })
+    axis(1, at=c(2,4,6,8,10,12,14,16,18,20,22,24)) 
+    title(main = "Average step activity by time inteval- Weekdays") 
+    grid()
+
+
+
+```
+  
+We can see a different pattern during weekdays compared to weekends, as expected. Where on weekdays we see an increase in the peak activity from 8 to 9:30, on weekend days we see an increase of the activity roughly evenly distributed from 8 to 20, so it seems the subject has a sedentary job but seems to enjoy sporty weekend days.
+
+
+
+
+
+
+
+
+
