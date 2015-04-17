@@ -15,6 +15,13 @@ and this one has graphic images and  it's 1.5MB, you have to download it first a
 it as intended.
 Also, you can replicate it by running the Rmd file, once you modify the working dir  
 
+#### FILES
+assesement_1.Rmd  The file with the knit R markdown with the complete code and documentation
+
+assesement_1.html The output document in a self-contained html format
+
+readme.md  This file.
+
 
 
 
