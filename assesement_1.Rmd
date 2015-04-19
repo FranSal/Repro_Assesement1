@@ -1,12 +1,12 @@
 ---
 title: "Peer Assesement 1"
 output:
+  html_document:
+    keep_md: yes
   word_document:
     fig_caption: yes
     fig_height: 5
     fig_width: 7
-  html_document: default
-keep_md: yes
 ---
 
 ####This is the document that describes my work for Coursera's Reproductible Research, Assesement 1  
