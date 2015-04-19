@@ -16,7 +16,9 @@ it as intended.
 Also, you can replicate it by running the Rmd file, once you modify the working dir  
 
 #### FILES
-assesement_1.Rmd  The file with the knit R markdown with the complete code and documentation
+assesement_1.Rmd  The file with the knit R markdown with the complete code and documentation  
+
+assesement_1.html The output Document in html format.
 
 assesement_1.md The output document in  md format
 
