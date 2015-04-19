@@ -209,12 +209,7 @@ par(mar = c(4,4,2,0))  # defining margins.
 
 xyplot(intSteps ~ interval/100 | day, data = weekactivity,
        layout = c(1, 2),xlab=" Time of the Day(24 hour)",  ylab=" Steps", type = "l",
-       main = "Average Steps by Interval"
-   )
-
-
-
-
+       main = "Average Steps by Interval")
 
 ```
   
