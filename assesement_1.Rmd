@@ -104,7 +104,7 @@ trim_activity <- activity %>%
 with(trim_activity, {
     par(mar = c(4,4,4,2))
     plot( interval/100, intSteps,type="l",  xlab=" Time of the Day(24 hour)", ylab=" Step activity", ylim = range(intSteps), col ="magenta", xlim = range(0:24), xaxt="n") 
-    axis(1, at=c(2,4,6,8,10,12,14,16,18,20,22,24)) 
+    axis(1, at=seq(0,24, by =2)) 
     title(main = "Average step activity by time inteval")
      grid()
 })
@@ -199,25 +199,28 @@ weekactivity <- corrected %>%
                 summarise( intSteps = mean(steps))
              
 par(mfrow = c(2, 1)) # define a dual pannel, 2 rows, by 1.
-par(mar = c(4,4,2,0))  # defining margins.
+par(mar = c(4,2,2,0))  # defining margins.
 
 # graphs code.
 with(subset(weekactivity, day=="weekend"), { # subsetting weekend days
     plot( interval/100, intSteps,type="l",  xlab=" ", ylab=" Steps", ylim = range(0:230), col ="darkmagenta", xlim = range(0:24), xaxt="n") 
      })
-   axis(1, at=c(2,4,6,8,10,12,14,16,18,20,22,24)) 
+    axis(1, at=seq(0,24, by =2)) 
     title(main = "Weekends") 
     grid()
 
    with(subset(weekactivity, day=="weekday"), { # subsetting weekdays
     plot( interval/100, intSteps,type="l",  xlab=" Time of the Day(24 hour)", ylab=" Steps", ylim = range(0:230), col ="blue", xlim = range(0:24), xaxt="n") 
      })
-    axis(1, at=c(2,4,6,8,10,12,14,16,18,20,22,24)) 
+     axis(1, at=seq(0,24, by =2)) 
     title(main = "Weekdays") 
     grid()
 
 ```
   
+   
+   
+   
 So the short answer is YES; there are different patterns.  
   
 We can observe a different pattern on weekends from  weekdays, as might be expected. Where on weekdays we see an  peak activity from 8 to 9:30 and then a plateau, on weekend days we see with roughly evenly distributed peaks from 8 to 20, so it seems the subject has a sedentary job but seems to enjoy sporty weekend days.
