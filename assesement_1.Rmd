@@ -1,6 +1,6 @@
 ---
 title: "Peer Assesement 1"
-output: html_document
+output: word_document
 keep_md: yes
 ---
 
@@ -102,7 +102,7 @@ trim_activity <- activity %>%
 
 # plot code. The x axis( interval) is divided by 100 to set hourly numbers on the x-axis.
 with(trim_activity, {
-    par(mar = c(4,4,4,2))
+    par(mar = c(4,4,5,0))
     plot( interval/100, intSteps,type="l",  xlab=" Time of the Day(24 hour)", ylab=" Step activity", ylim = range(intSteps), col ="magenta", xlim = range(0:24), xaxt="n") 
     axis(1, at=seq(0,24, by =2)) 
     title(main = "Average step activity by time inteval")
@@ -199,7 +199,7 @@ weekactivity <- corrected %>%
                 summarise( intSteps = mean(steps))
              
 par(mfrow = c(2, 1)) # define a dual pannel, 2 rows, by 1.
-par(mar = c(4,2,2,0))  # defining margins.
+par(mar = c(4,4,2,0))  # defining margins.
 
 # graphs code.
 with(subset(weekactivity, day=="weekend"), { # subsetting weekend days
