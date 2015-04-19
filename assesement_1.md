@@ -1,13 +1,4 @@
----
-title: "Peer Assesement 1"
-output:
-  html_document:
-    keep_md: true
-  word_document:
-    fig_caption: yes
-    fig_height: 5
-    fig_width: 7
----
+# Peer Assesement 1
 
 ####This is the document that describes my work for Coursera's Reproductible Research, Assesement 1  
 Autor:FSC
@@ -21,8 +12,8 @@ Autor:FSC
 
 The data file for the assignment has been downloaded to my download folder.
 The code segment below will use ProjectTemplate library to create a set if folders for this project, copy the file to the data folder and unzip it, then it reads the data into 'repdata' object
-```{r, results = 'hide', message=FALSE}
 
+```r
 library(ProjectTemplate)
 library(plyr)
 library(dplyr)
@@ -30,11 +21,11 @@ library(tcltk)
 library(ggplot2)
 library(lattice)
 library(lubridate)
-
 ```
 
 
-```{r}
+
+```r
 WorkDir <- "/Volumes/LION-DATA/COURSERA /DATA SCIENTIST/REPRODUCIBLE RESEARCH" # work dir has to be modified to fit your system. The rest pends from it, so it should work
 setwd(WorkDir)
 
@@ -61,7 +52,8 @@ activity <- tbl_df(read.csv("activity.csv"))
 The data frame is cleaned by filtering NA's out, then grouped by date and summarize( sum) the total steps into the steps object. 
 A histogram with bins=1000 steps is shown in wich we can see that the mean value of steps in a day is around 11,000 steps.
 
-```{r}
+
+```r
 steps <- activity %>%
      filter(steps != "NA") %>%  # filtering out rows with NA's on steps
      group_by(date) %>% # grouping by date
@@ -71,22 +63,40 @@ hist(steps$daySteps,col="red", breaks =seq(0,25000, by = 1000), main = "Total st
   grid() # adding a grid
 ```
 
+![](assesement_1_files/figure-html/unnamed-chunk-3-1.png) 
+
 ####  Mean and median  
 
-```{r}
+
+```r
 options(scipen=999)
 options(digits = 2)
 mean <- summarize(steps, mean(daySteps))
 median <- summarize(steps, median(daySteps))
 mean 
+```
+
+```
+## Source: local data frame [1 x 1]
+## 
+##   mean(daySteps)
+## 1          10766
+```
+
+```r
 median
+```
 
-
+```
+## Source: local data frame [1 x 1]
+## 
+##   median(daySteps)
+## 1            10765
 ```
  The calculated mean and median ( code above) is:  
  
-    -   Mean:    `r mean`  
-    - Median:    `r median`
+    -   Mean:    10766.19  
+    - Median:    10765
  
  So we see that the distribution shows  mean symetry ( mean = median). 
 
@@ -100,7 +110,8 @@ median
 Defining trim_activity as the activity trimmed from NA's, groupped by the interval of the day and summarize the mean of each interval,
 then plotting it.
 
-```{r}
+
+```r
 trim_activity <- activity %>%
      filter(steps != "NA")  %>% # filtering out rows with NA's on steps
      group_by(interval) %>%
@@ -116,16 +127,24 @@ with(trim_activity, {
 })
 ```
 
+![](assesement_1_files/figure-html/unnamed-chunk-5-1.png) 
+
 
 Then search for the max of the day...
 
-```{r}
 
+```r
 maxActivity <- summarise(trim_activity, maxSteps = max(intSteps), interval = substr(hm(interval[intSteps ==maxSteps]/100),1,6))
 maxActivity 
-           
 ```
-which is an average of  `r maxActivity$maxSteps` steps at `r maxActivity$interval`   time interval.
+
+```
+## Source: local data frame [1 x 2]
+## 
+##   maxSteps interval
+## 1      206   8H 35M
+```
+which is an average of  206.17 steps at 8H 35M   time interval.
 
 
 ####_________________________________________________________________________
@@ -137,7 +156,8 @@ which is an average of  `r maxActivity$maxSteps` steps at `r maxActivity$interva
 
 a.- Calculating the number of missing values...
 
-```{r}
+
+```r
 dimTot <-dim(activity)
 
 act_nas <-activity %>%
@@ -145,15 +165,19 @@ act_nas <-activity %>%
 
 dimNas<-dim(act_nas)
 dimNas[1]
+```
 
 ```
-... and, there are  `r dimNas[1]` NA's on a total of `r dimTot[1]` records; or about 13%  
+## [1] 2304
+```
+... and, there are  2304 NA's on a total of 17568 records; or about 13%  
   
 Now creating a dataset with the NA's filled with the average value for that interval. We'll take the average from trim_activity that is groupped by interval and sumarized by it. 
 So trim_activity holds the average value for each 5 minute period of the day.
   
 
-```{r}
+
+```r
 corrected <-  activity %>%
             mutate(steps = ifelse(is.na(steps), trim_activity[trim_activity$interval == interval,]$intSteps, steps))%>% # ifelse() inserts on 'steps' the average value if the original value is NA
             filter(steps != "NA") # filtering out rows with NA's on steps ( that are redundant since we inseted the averages)
@@ -166,21 +190,36 @@ newSteps <- corrected %>% # now 'corrected' holds valid values, so  we do the sa
 hist(newSteps$daySteps,col="darkblue", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurences"))
   grid()
 ```
+
+![](assesement_1_files/figure-html/unnamed-chunk-8-1.png) 
   
 Then, for the mean and median, we take the percent difference between the old value and the new one.
-```{r}
 
+```r
 newmean <- summarize(newSteps, mean(daySteps))
 newmedian <- summarize(newSteps, median(daySteps))
 
 diff_median <- 100*abs(median-newmedian)/median # multiplied by 100 to get  a percent difference
 diff_mean <- 100*abs(mean-newmean)/mean
 diff_median
+```
+
+```
+##   median(daySteps)
+## 1           0.0055
+```
+
+```r
 diff_mean
+```
+
+```
+##   mean(daySteps)
+## 1              0
 ```
   
 We can see that inserting the average value of the interval into NA values it virtually doesn't modify the chacracteristics of the distribution, since
-the mean is unaffected (obvious, since we have introduced mean values) and the median is affected by only `r diff_median`%, a negligible difference.  
+the mean is unaffected (obvious, since we have introduced mean values) and the median is affected by only 0.01%, a negligible difference.  
   
 The only concern is about stationality ( weekends vs non weekends), but it should be negligible too, since we deal wih a small change on a  0.01% difference.
 
@@ -198,7 +237,8 @@ Then we group and summarise by interval as before.
 The plotting code define a dual pannel that plots the subset group 'weekend' on the upper plot
 and the subset group 'weekdays' on the lower one.
 
-```{r fig.height =6}
+
+```r
 weekactivity <- corrected %>%
                 mutate( day = ifelse(wday(ymd(date))==7 | wday(ymd(date))==1, "weekend", "weekday" )) %>% ## adding a day category, then grouping and summarizing
                 group_by(day,  interval) %>%
@@ -210,8 +250,9 @@ par(mar = c(4,4,2,0))  # defining margins.
 xyplot(intSteps ~ interval/100 | day, data = weekactivity,
        layout = c(1, 2),xlab=" Time of the Day(24 hour)",  ylab=" Steps", type = "l",
        main = "Average Steps by Interval")
-
 ```
+
+![](assesement_1_files/figure-html/unnamed-chunk-10-1.png) 
   
    
    
