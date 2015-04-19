@@ -253,8 +253,6 @@ weekactivity <- corrected %>%
                 group_by(day,  interval) %>%
                 summarise( intSteps = mean(steps))
              
-par(mfrow = c(2, 1)) # define a dual pannel, 2 rows, by 1.
-par(mar = c(4,4,2,0))  # defining margins.
 
 xyplot(intSteps ~ interval/100 | day, data = weekactivity,
        layout = c(1, 2),xlab=" Time of the Day(24 hour)",  ylab=" Steps", type = "l",
