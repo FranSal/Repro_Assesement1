@@ -18,7 +18,7 @@ Also, you can replicate it by running the Rmd file, once you modify the working 
 #### FILES
 assesement_1.Rmd  The file with the knit R markdown with the complete code and documentation
 
-assesement_1.docx The output document in  docx format
+assesement_1.md The output document in  md format
 
 readme.md  This file.
 
