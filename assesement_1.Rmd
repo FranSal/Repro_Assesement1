@@ -1,7 +1,7 @@
 ---
 title: "Peer Assesement 1"
 output: html_document
-keep_md: true
+keep_md: yes
 ---
 
 ####This is the document that describes my work for Coursera's Reproductible Research, Assesement 1  
@@ -61,6 +61,7 @@ steps <- activity %>%
      summarise( daySteps = sum(steps)) ## and summing the steps by groupped date.
 ## histogram 
 hist(steps$daySteps,col="red", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurrences"))
+  grid()
 ```
 
 ####  Mean and median  
@@ -151,6 +152,7 @@ newSteps <- corrected %>% ## now 'corrected' holds valid values, so  we do the s
      summarise( daySteps = sum(steps)) ## and summing the steps by groupped date.
 ## histogram 
 hist(newSteps$daySteps,col="darkblue", breaks =seq(0,25000, by = 1000), main = "Total steps per day",, xlab= ("Total daily Steps"), ylab= ("Nr. of occurences"))
+  grid()
 ```
   
 Then, for the mean and median, we take the percent difference between the old value and the new one.
